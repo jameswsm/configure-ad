@@ -1,11 +1,15 @@
 ![image](https://github.com/jameswsm/configure-ad/assets/170709350/532c9016-9486-4f51-a45e-fde696c9324f)
 </p>
 
-<h1>Active Directory Configuration</h1>
+<h1>Active Directory Configuration Tutorial</h1>
 Configuration of Active Directory with Azure VMs.<br />
 <br />
 Part 1: Setup Resources in Azure <br />
-Part 2:
+Part 2: Ensure Connectivity between the client and Domain Controller <br />
+Part 3: Install Active Directory Domain Services + promote as DC <br />
+Part 4: Create an Admin User Account in Active Directory <br />
+Part 5: Join a client to the domain <br />
+Part 6: Allow any user on the domain to log into Client1<br />
 
 
 <h2>Environments and Technologies Used</h2>
@@ -13,6 +17,8 @@ Part 2:
 - Microsoft Azure (Virtual Machines/Compute)
 - Remote Desktop
 - Internet Information Services (IIS)
+- Active Directory Users and Computers
+- Server Manager
 
 <h2>Operating Systems Used </h2>
 
@@ -21,28 +27,8 @@ Part 2:
 <h2>List of Prerequisites</h2>
 
 - Microsoft Azure Active Subscription (Creation of Reasearch Group, VMs, Virtual Networks, Subnets)
-- 
--
--
--
--
--
-- 
-
-
-//When we have a server thats offering services to another computer, in our ex, we have a domain controller offering active directory services, in these cases, we DONT want the ip address to change aka do not get it from dhcp, so we are gonna change domain controller virtual nic ip address from dynamic to static
-
-//We are going to join a client1 computer to the domain, and we want to control DNS settings on this computer, when we create a VM inside an Azure virtual network, the ip addressing is set up automatically, the DNS is set to use the VNET DNS Server, we dont want our client computer to use the VNET DNS serever in this case, we want our client to use the IP ADRESS of the Domain Controller as the DNS server, bc when you install active directory on a server, and turn that server into a domain controller, a dns service is installed as well, and in order for client1 to be able to join the domain, it needs to use the domain controller as its DNS server.
-
-//When we create a VM, it automatically creates a RG and virtual network.
-
-//Domain Controller is just a server/computer that has AD installed on it
-
-//gotta set Domain Controller NIC to static.
-
-
-<h2>Part 1: (Setup Resources in Azure) Steps: 1 - 12</h2>
-
+  
+<h2>Part 1: (Setup Resources in Azure) Steps: 1 - 18</h2>
 
 ![image](https://github.com/jameswsm/configure-ad/assets/170709350/da8825ae-5c75-4817-9c3f-a6b80893da66)
 <p>
@@ -62,9 +48,9 @@ Step 3: Create new Resource Group and choose a name. (ex: activeDirectory)
 </p>
 <br />
 
-![image](https://github.com/jameswsm/configure-ad/assets/170709350/dc903778-d3f6-4d5d-9c65-67d418de3874)
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/ff915c89-1138-4c56-b9ac-8e3ca095049e)
 <p>
-Step 4: Enter information, ie: Virtual machine name that we will use for our Domain Controller (ex DC1).
+Step 4: Enter information, ie: Virtual machine name that we will use for our Domain Controller (ex DC1) image: Windows Server 2022 Datacenter: Azure Edition.
 </p>
 <br />
 
@@ -141,26 +127,200 @@ Step 17: Change the Private IP address from dynamic to static (ex: 10.0.0.4). Cl
 </p>
 <br />
 
-
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/c560e002-a94f-4adf-a642-f3e2f4adddef)
 <p>
-Step 18: 
+Step 18: Navigate to Virtual Machines. Ensure Both Client1 and DC1 are in the same Virtual network/subnet (ex: DC1-vnet/default)
+</p>
+<br />
+<br />
+<br />
+
+<h2>Part 2: (Ensure Connectivity between the client and Domain Controller) Steps: 1 - 5</h2>
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/edd0cb1c-6a92-4418-887d-bb6d440a522f)
+<p>
+Step 1: If we login to Client1 and ping DC1, it will fail. We need to login to our Domain Controller(DC1) and enable ICMPv4 on the local windows Firewall. Copy IP address from DC1 (ex:74.235.208.187) -> Use this to RDC into DC1 -> Enter credentials (ex:labuser/password)
+</p>
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/614bcade-c164-4423-81a0-5c86f18ba0d8)
+<p>
+Step 2: Open Windows Defender Firewall with Advanced Security
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/fa9266ea-4d6d-4c37-8c34-06f7a986949a)
+<p>
+Step 3: Click Inbound Rules -> Enable both ICMP Echo Requests on protocol ICMPv4
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/e28cdc07-d4c1-4894-a583-753bd6744d8b)
+<p>
+Step 4: Minimize DC1 -> RDC into Client1
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/89591070-caf0-4942-bc42-3c8380cc4f9c)
+<p>
+Step 5: Open Command Line -> echo ping the Domain Controller's private IP address (ex: 10.0.0.4) -> Confirm connectivity is working -> close command lin -> minimize Client 1
+</p>
+<br />
+<br />
+<br />
+
+<h2>Part 3: (Install Active Directory Domain Services + promote as DC) Steps: 1 - 5</h2>
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/12e714cd-0f4f-4634-a016-9a28f6f58f8d)
+<p>
+Step 1: RDC into DC1. In Server Manager click Add roles and features -> next -> next -> next
 </p>
 <br />
 
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/6847ada0-1561-471b-a452-b09df577e884)
+<p>
+Step 2: Check the box for Active Directory Domain Services -> Add Features -> next through all dependencies -> install
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/4fbbfb24-1a6d-4502-9663-31c824b73299)
+<p>
+Step 3: Click exclamation in top right corder of Server Manager -> Click "Promote this server to a domain controller"
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/998811d9-27c3-4f2a-8a74-c014a5ff5774)
+<p>
+Step 4: Choose Add a new forest -> Add a root domain name (ex: mydomain.com) -> Next
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/db0fbf00-bc0c-4be9-8b30-5078104dd5aa)
+<p>
+Step 5: Enter a password -> Next through all checks -> Install -> Computer will restart when finished -> RDC back into DC1 after restart -> May have to enter username with domain: (username: mydomain.com\labuser)
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/4d0a9ca5-3a60-45a0-8018-637146554c12)
+<p>
+Domain Controller is online with domain set up.
+</p>
+<br />
+<br />
+<br />
 
 
+<h2>Part 4: (Create an Admin User Account in Active Directory) Steps: 1 - 7</h2>
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/771c9cc6-97d5-4c9a-9671-7ff58ed369bf)
+<p>
+Step 1: Navigate to Active Directory Users and Computers
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/351a3013-5f31-48ae-b501-15a69c11972e)
+<p>
+Step 2: Create a new Organizational Unit (ex: _EMPLOYEES). note: underscore in name makes it easier to filter. Create another OU (ex: _ADMINS)
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/8903a485-8493-47e3-8b3b-0b1bceb57a24)
+<p>
+Step 3: We can continue using labuser, however ambiguous account names are not best practices. We are going to create another ADMIN account that is tied to an identity. Right click _ADMINS to create a new user.
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/b513ed32-1f5c-4c04-bf2f-0c61ef9244e9)
+<p>
+Step 4: Fill out information for the new user. (ex: james_admin) -> Next -> Set Password
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/972c0c2c-77e8-47aa-a851-aa131e733907)
+<p>
+Step 5: Go to properties of user we want to give admin permissions
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/af399f80-cdb8-4c8e-a7c5-06f41c0365c1)
+<p>
+Step 6: Click Member of -> enter domain and click Check Names -> Domain Admins -> Ok -> Ok -> Apply
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/4839e78f-a39e-4f82-af60-820e287d5a0e)
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/2bbb2385-5f51-492b-95e6-7dbbeec7e858)
+<p>
+Step 7: Log out of Domain Controller(currently is labuser), log back in as our new user (ex:james_admin)
+</p>
+<br />
+<br />
+<br />
 
 
+<h2>Part 5: (Join a client to the domain) Steps: 1 - 8</h2>
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/523ad90a-c430-4fac-94d2-03e1b256f731)
+<p>
+Step 1: Navigate to Domain Controller(ex: DC1) Virtual Machine -> Network settings -> copy private IP ADDRESS  (ex: 10.0.0.6)
+</p>
+<p>
+note: We are going to join client computer to the domain, and we want to control DNS settings on this computer. When we create a VM inside an Azure virtual network, the ip addressing is set up automatically and the DNS is set to use the VNET DNS Server. We dont want our client computer to use the VNET DNS serever, we want our client to use the IP ADDRESS of the Domain Controller as the DNS server, because when you install active directory on a server, and turn that server into a domain controller, a dns service is installed as well. In order for the client to be able to join the domain, it needs to use the domain controller as its DNS server. The domain controller knows what our domain is (ex: mydomain.com), if our client uses the VNET DNS server, the VNET DNS server is going to look through the internet for mydomain.com and fail.
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/feea5da7-2fa3-4e4b-bf8b-bc06c5c29040)
+<p>
+Step 2: Navigate to the Client1 Virtual Machine -> Network settings -> click Network interface (ex: dc1305)
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/cf5b5ea7-2834-4e97-9b74-7be86c30c88c)
+<p>
+Step 3: Settings -> DNS servers -> Check in Custom -> Enter Domain Controller (ex:DC1) private IP ADDRESS -> Save
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/a32e18d4-2738-421b-a5d4-6f63a3bff6a9)
+<p>
+Step 4: Navigate to Client1 Virtual Machine -> Restart -> RDC into Client1 using labuser bc its not part of the domain yet.
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/97ccd184-e93b-4e71-93e7-56eb07cdc18c)
+<p>
+Step 5: Open command line -> ipconfig /all -> DNS Server should be 10.0.0.6 (Domain Controller private IP ADDRESS)
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/f9c0f445-33bc-4a9e-8186-359c8c6202bd)
+<p>
+Step 6: Start -> System -> Rename this PC(adavanced) -> Change -> Check in Domain -> enter domain (ex:mydomain.com) -> Ok -> Enter the info of the Domain Administrator that we created (ex: mydomain.com\james_admin) -> Computer will restart
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/1250c527-c984-4bd5-90cd-44b537513595)
+<p>
+Step 7: Now that Client1 is part of the domain, we can log into Client1 with our domain admin account.
+</p>
+<br />
+
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/21e76e2c-1b11-40e6-aec5-05b14284a6a2)
+<p>
+Step 8: To check, log into Client1 using admin username/password. 
+</p>
+<br />
+<br />
+<br />
 
 
+<h2>Part 6: (Allow multiple "domain users" to log into client) Step: 1 </h2>
 
-
-
-
-
-
-
-
-
-
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/d661b2b2-19e6-4636-ab33-d6093a38d83c)
+<p>
+Step 1: Client1 Environment -> System -> Remote Desktop -> Select users that can remotely access this PC -> Add -> domain users -> Check Names -> Ok
+</p>
+<p>
+note: This will simulate an environment on Client1 where any user on the domain can log into Client1 using their own username/password. Group Policy allows us to do the above to many different Clients at the same time.
+</p>
+<br />
