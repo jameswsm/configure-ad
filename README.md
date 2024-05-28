@@ -10,6 +10,7 @@ Part 3: Install Active Directory Domain Services + promote as DC <br />
 Part 4: Create an Admin User Account in Active Directory <br />
 Part 5: Join a client to the domain <br />
 Part 6: Allow multiple users on the domain to log into Client1<br />
+Part 7: Test case for Part 6 <br />
 
 
 <h2>Environments and Technologies Used</h2>
@@ -139,7 +140,7 @@ Step 18: Navigate to Virtual Machines. Ensure Both Client1 and DC1 are in the sa
 
 ![image](https://github.com/jameswsm/configure-ad/assets/170709350/edd0cb1c-6a92-4418-887d-bb6d440a522f)
 <p>
-Step 1: If we login to Client1 and ping DC1, it will fail. We need to login to our Domain Controller(DC1) and enable ICMPv4 on the local windows Firewall. Copy IP address from DC1 (ex:74.235.208.187) -> Use this to RDC into DC1 -> Enter credentials (ex:labuser/password)
+Step 1: If we log in to Client1 and ping DC1, it will fail. We need to log in to our Domain Controller(DC1) and enable ICMPv4 on the local windows Firewall. Copy IP address from DC1 (ex:74.235.208.187) -> Use this to RDC into DC1 -> Enter credentials (ex:labuser/password)
 </p>
 
 ![image](https://github.com/jameswsm/configure-ad/assets/170709350/614bcade-c164-4423-81a0-5c86f18ba0d8)
@@ -325,18 +326,55 @@ note: This will simulate an environment on Client1 where any user on the domain 
 </p>
 <br />
 
+<h2>Part 7: (Test case for Part 6 ) Step: 1 - 6</h2>
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/f0584d9e-94df-408f-aa2e-2da7f13b2288)
+<p>
+Step 1: Log into Domain Controller(ex: DC1) as admin (ex: james_admin)
+</p>
+<br />
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/5afec38d-4149-48fc-9088-f621c58d5fd7)
+<p>
+Step 2: Open Powershell_ise as administrator 
+</p>
+<br />
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/01e89f96-6d1f-4f5b-b3a6-c6bc1b0dbc1c)
+<p>
+Step 3: Create a new script -> paste this code into file (https://github.com/joshmadakor1/AD_PS/blob/master/Generate-Names-Create-Users.ps1) -> Run script
+</p>
+<p>
+note: This will create 10,000 different accounts with the password: Password1
+</p>
+<br />
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/934c8d5b-2cef-49cf-9e96-740baeb82e8d)
+<p>
+Step 4: Navigate to Active Directory Users and Computers -> _EMPLOYEES -> refresh -> View employee list being populated
+</p>
+<br />
+<p>
+note: Because all 10,000 users are in the domain, they can all log in to Client1 with their own username/password.
+</p>
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/b5f48168-7442-4595-aecd-835371594423)
+<p>
+Step 5: Copy a name from _EMPLOYEES (ex: bes.jom) -> Minimize DC1
+</p>
+<br />
 
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/f0707613-ad5b-43c6-baa5-35236593ab9c)
+<p>
+Step 6: Log into Client1 with the employee name we have copied (ex: user:bes.jom password:Password1 )
+</p>
+<br />
 
-
-
-
-
-
+![image](https://github.com/jameswsm/configure-ad/assets/170709350/1b6d461c-63a6-4177-8417-c36d2b839d47)
+<p>
+Because bes.jom is in the domain and Client1 is joined to that domain, Client1 can use the domain to validate bes.jom and allow bes.jom to log into Client1. All 10,000 users can now log into Client1!
+</p>
+<br />
 
 
 
