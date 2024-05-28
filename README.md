@@ -20,6 +20,7 @@ Part 7: Test case for Part 6 <br />
 - Internet Information Services (IIS)
 - Active Directory Users and Computers
 - Server Manager
+- Powershell
 
 <h2>Operating Systems Used </h2>
 
