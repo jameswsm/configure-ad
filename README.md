@@ -9,7 +9,7 @@ Part 2: Ensure Connectivity between the client and Domain Controller <br />
 Part 3: Install Active Directory Domain Services + promote as DC <br />
 Part 4: Create an Admin User Account in Active Directory <br />
 Part 5: Join a client to the domain <br />
-Part 6: Allow any user on the domain to log into Client1<br />
+Part 6: Allow multiple users on the domain to log into Client1<br />
 
 
 <h2>Environments and Technologies Used</h2>
@@ -324,3 +324,33 @@ Step 1: Client1 Environment -> System -> Remote Desktop -> Select users that can
 note: This will simulate an environment on Client1 where any user on the domain can log into Client1 using their own username/password. Group Policy allows us to do the above to many different Clients at the same time.
 </p>
 <br />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
