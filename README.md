@@ -343,7 +343,7 @@ Step 2: Open Powershell_ise as administrator
 
 ![image](https://github.com/jameswsm/configure-ad/assets/170709350/01e89f96-6d1f-4f5b-b3a6-c6bc1b0dbc1c)
 <p>
-Step 3: Create a new script -> paste this code into file (https://github.com/joshmadakor1/AD_PS/blob/master/Generate-Names-Create-Users.ps1) -> Run script
+Step 3: Create a new script -> paste this code into file https://github.com/jameswsm/ad-usergenerate -> Run script
 </p>
 <p>
 note: This will create 10,000 different accounts with the password: Password1
